@@ -4,7 +4,7 @@ from supabase import create_client, Client
 
 SUPABASE_URL = "https://wjelqoiakkyljdxupmyf.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZWxxb2lha2t5bGpkeHVwbXlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MTIyMjQsImV4cCI6MjA2MjQ4ODIyNH0.tVkJdo_6Tu2blnfgSiBdaoYM5b2635nYuaR5MzRiRGo"
-supabase: Client = create_client(url, key)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @st.cache_resource
 def init_supabase():
