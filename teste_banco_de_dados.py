@@ -10,4 +10,4 @@ def buscar_dados():
     response = supabase.table("alunos").select("*").execute()
     return response
 
-buscar_dados()
+print(buscar_dados())
