@@ -2,9 +2,8 @@ import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
 
-# Substitua pelos seus dados reais
-url = "https://wjelqoiakkyljdxupmyf.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZWxxb2lha2t5bGpkeHVwbXlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MTIyMjQsImV4cCI6MjA2MjQ4ODIyNH0.tVkJdo_6Tu2blnfgSiBdaoYM5b2635nYuaR5MzRiRGo"
+SUPABASE_URL = "https://wjelqoiakkyljdxupmyf.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqZWxxb2lha2t5bGpkeHVwbXlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MTIyMjQsImV4cCI6MjA2MjQ4ODIyNH0.tVkJdo_6Tu2blnfgSiBdaoYM5b2635nYuaR5MzRiRGo"
 supabase: Client = create_client(url, key)
 
 @st.cache_resource
