@@ -15,7 +15,7 @@ supabase: Client = init_supabase()
 st.title("Visualização da Tabela 'usuarios'")
 
 with st.spinner("Carregando dados..."):
-    response = supabase.table("usuarios").select("*").execute()
+    response = supabase.table("alunos").select("*").execute()
 
 if response.error:
     st.error(f"Erro ao buscar dados: {response.error.message}")
