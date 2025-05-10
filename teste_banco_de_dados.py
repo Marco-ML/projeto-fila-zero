@@ -16,12 +16,9 @@ st.title("Visualização da Tabela 'alunos'")
 with st.spinner("Carregando dados..."):
     response = supabase.table("alunos").select("*").execute()
 
-if response.error:
-    st.error(f"Erro ao buscar dados: {response.error.message}")
+df = pd.DataFrame(response.data)
+if df.empty:
+    st.info("Nenhum dado encontrado na tabela.")
 else:
-    df = pd.DataFrame(response.data)
-    if df.empty:
-        st.info("Nenhum dado encontrado na tabela.")
-    else:
-        st.success("Dados carregados com sucesso!")
-        st.dataframe(df)
+    st.success("Dados carregados com sucesso!")
+    st.dataframe(df)
