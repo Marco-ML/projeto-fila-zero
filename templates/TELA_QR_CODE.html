@@ -49,6 +49,7 @@
       margin: 0 auto 10px;
       background: url('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://exemplo-pagamento.com/pix123') no-repeat center/cover;
       transition: opacity 0.3s;
+      cursor: pointer; /* Adicionado para indicar que é clicável */
     }
 
     .timer {
@@ -158,6 +159,11 @@
         }, 2000);
       });
     }
+
+    // Atualizado: redireciona sempre para Tela_pagamento.html ao clicar no QR Code
+    qrCodeElement.addEventListener('click', function() {
+      window.location.href = 'Tela_pagamento.html';
+    });
 
     const timerInterval = setInterval(updateTimer, 1000);
     updateTimer();

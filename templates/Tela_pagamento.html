@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagamento Aprovado</title>
+    <style>
+      body {
+        background-color: #f7f7f7;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: #333;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 32px 24px;
+        text-align: center;
+        max-width: 350px;
+        width: 100%;
+      }
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f5e9;
+        border-radius: 50%;
+      }
+      .success-icon svg {
+        width: 48px;
+        height: 48px;
+        color: #2ecc40;
+      }
+      .title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2ecc40;
+        margin-bottom: 10px;
+      }
+      .details {
+        font-size: 1rem;
+        margin-bottom: 18px;
+        color: #444;
+      }
+      .info {
+        background: #f0f0f0;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 0.98rem;
+        text-align: left;
+      }
+      .footer {
+        margin-top: 18px;
+        font-size: 0.95rem;
+        color: #888;
+      }
+      .button {
+        margin-top: 12px;
+        padding: 10px 22px;
+        background: #0011fa;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .button:hover {
+        background: #0026a3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="12" fill="#2ecc40" opacity="0.15" />
+          <path
+            d="M7 13.5L10.5 17L17 10.5"
+            stroke="#2ecc40"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <div class="title">Pagamento Aprovado!</div>
+      <div class="details">
+        Seu pagamento via PIX foi confirmado com sucesso.
+      </div>
+      <div class="info">
+        <strong>Nome:</strong> Nome do Aluno<br />
+        <strong>Matrícula:</strong> 1234567891011<br />
+        <strong>Valor:</strong> R$ 3,00<br />
+        <strong>Pedido:</strong> #12345
+      </div>
+      <button class="button" onclick="window.location.href='TELA_QR_CODE.html'">
+        Voltar ao início
+      </button>
+      <div class="footer">Obrigado por utilizar o RU UERJ!</div>
+    </div>
+  </body>
+</html>
