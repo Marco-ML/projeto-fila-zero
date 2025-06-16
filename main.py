@@ -2,11 +2,49 @@ from flask import Flask, make_response, jsonify, render_template, redirect, url_
 import sqlite3
 from datetime import datetime, timedelta
 
-#from bd import pedidos
-
 app = Flask(__name__)
 
 app.secret_key = 'uma_chave_secreta_unica_e_segura'
+
+# Nova rota raiz: Tela de Login
+@app.route('/', methods=['GET'])
+def login():
+    return render_template('login.html')
+
+# Nova rota para processar o login
+@app.route('/login', methods=['POST'])
+def realizar_login():
+    role = request.form.get('role')
+    if role == 'cozinha':
+        return redirect(url_for('index'))
+    elif role == 'aluno_serv':
+        return redirect(url_for('aluno_serv'))
+    else:
+        flash('Escolha uma opção válida!')
+        return redirect(url_for('login'))
+
+# Rota para Cozinha (já existente: função index)
+@app.route('/index')
+def index():
+    pedidos = obter_pedidos()
+    return render_template('index.html', pedidos=pedidos)
+
+@app.route('/aluno_serv')
+def aluno_serv():
+    from datetime import datetime
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect('db/cardapio.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cardapio WHERE date(dia) = ?", (current_date,))
+    cardapio = cursor.fetchone()
+    conn.close()
+    if not cardapio:
+        # Dummy tuple: (id, salada1, salada2, prato_principal, vegetariano, guarnicao1, guarnicao2, 
+        # acompanhamento1, acompanhamento2, acompanhamento3, sobremesa1, sobremesa2, dia)
+        cardapio = (0, "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
+                    "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
+                    "Não preenchido", "Não preenchido", "Não preenchido", current_date)
+    return render_template('aluno_serv.html', cardapio=cardapio)
 
 @app.route('/obter', methods=['GET'])
 def obter_pedidos():
@@ -70,13 +108,59 @@ def enviar_mensagem():
 def cardapio():
     return render_template('cardapio.html')
 
-@app.route('/')
-def index():
-    pedidos = obter_pedidos()
-    return render_template('index.html', pedidos=pedidos)
-
-@app.route('/cadastrar_cardapio')
+@app.route('/cadastrar_cardapio', methods=['POST'])
 def cadastrar_cardapio():
-    pass
+    # Coleta os dados do formulário
+    salada1 = request.form.get('salada1')
+    salada2 = request.form.get('salada2')
+    prato_principal = request.form.get('prato_principal')
+    vegetariano = request.form.get('vegetariano')
+    guarnicao1 = request.form.get('guarnicao1')
+    guarnicao2 = request.form.get('guarnicao2')
+    acompanhamento1 = request.form.get('acompanhamento1')
+    acompanhamento2 = request.form.get('acompanhamento2')
+    acompanhamento3 = request.form.get('acompanhamento3')
+    sobremesa1 = request.form.get('sobremesa1')
+    sobremesa2 = request.form.get('sobremesa2')
+    
+    # Insere os dados no banco de dados cardapio.db
+    conn = sqlite3.connect('db/cardapio.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO cardapio (salada1, salada2, prato_principal, vegetariano, guarnicao1, guarnicao2, 
+                              acompanhamento1, acompanhamento2, acompanhamento3, sobremesa1, sobremesa2)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (salada1, salada2, prato_principal, vegetariano, guarnicao1, guarnicao2, 
+          acompanhamento1, acompanhamento2, acompanhamento3, sobremesa1, sobremesa2))
+    conn.commit()
+    conn.close()
+    
+    flash('Cardápio cadastrado com sucesso!')
+    return redirect(url_for('cardapio'))
+
+@app.route('/cardapio_dia')
+def cardapio_dia():
+    from datetime import datetime
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect('db/cardapio.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cardapio WHERE date(dia) = ?", (current_date,))
+    cardapio = cursor.fetchone()
+    conn.close()
+    if not cardapio:
+        # Dummy tuple: (id, salada1, salada2, prato_principal, vegetariano, guarnicao1, guarnicao2, 
+        # acompanhamento1, acompanhamento2, acompanhamento3, sobremesa1, sobremesa2, dia)
+        cardapio = (0, "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
+                    "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
+                    "Não preenchido", "Não preenchido", "Não preenchido", current_date)
+    return render_template('cardapio_dia.html', cardapio=cardapio)
+
+@app.route('/tela_qr_code')
+def tela_qr_code():
+    return render_template('TELA_QR_CODE.html')
+
+@app.route('/tela_pagamento')
+def tela_pagamento():
+    return render_template('Tela_pagamento.html')
 
 app.run(debug=True)

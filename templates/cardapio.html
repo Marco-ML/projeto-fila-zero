@@ -31,7 +31,7 @@
         {% endwith %}
 
         <!-- Formulário de cadastro do cardápio -->
-        <form action="{{ url_for('cadastrar_cardapio') }}" method="POST">
+        <form action="{{ url_for('cadastrar_cardapio') }}" method="POST" onsubmit="return confirm('Deseja mesmo enviar?')">
             <!-- Saladas -->
             <div class="form-group">
                 <label for="salada1">Salada 1</label>

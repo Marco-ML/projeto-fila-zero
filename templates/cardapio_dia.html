@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <!-- ...existing head code... -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio do Dia</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mb-3">&larr; Voltar</a>
+    <h2 class="text-center mb-4">Cardápio do Dia</h2>
+    {% if cardapio %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Saladas</h5>
+          <p class="card-text">
+            Salada 1: {{ cardapio[1] }}<br>
+            Salada 2: {{ cardapio[2] }}
+          </p>
+          <h5 class="card-title">Prato Principal</h5>
+          <p class="card-text">{{ cardapio[3] }}</p>
+          <h5 class="card-title">Vegetariano</h5>
+          <p class="card-text">{{ cardapio[4] }}</p>
+          <h5 class="card-title">Guarnições</h5>
+          <p class="card-text">
+            Guarnição 1: {{ cardapio[5] }}<br>
+            Guarnição 2: {{ cardapio[6] }}
+          </p>
+          <h5 class="card-title">Acompanhamentos</h5>
+          <p class="card-text">
+            Acompanhamento 1: {{ cardapio[7] }}<br>
+            Acompanhamento 2: {{ cardapio[8] }}<br>
+            Acompanhamento 3: {{ cardapio[9] }}
+          </p>
+          <h5 class="card-title">Sobremesas</h5>
+          <p class="card-text">
+            Sobremesa 1: {{ cardapio[10] }}<br>
+            Sobremesa 2: {{ cardapio[11] }}
+          </p>
+          <p class="text-muted">Data: {{ cardapio[12] }}</p>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-center">Nenhum cardápio disponível para hoje.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

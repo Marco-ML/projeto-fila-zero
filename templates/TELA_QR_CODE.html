@@ -162,7 +162,7 @@
 
     // Atualizado: redireciona sempre para Tela_pagamento.html ao clicar no QR Code
     qrCodeElement.addEventListener('click', function() {
-      window.location.href = 'Tela_pagamento.html';
+      window.location.href = "{{ url_for('tela_pagamento') }}";
     });
 
     const timerInterval = setInterval(updateTimer, 1000);
