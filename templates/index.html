@@ -34,35 +34,60 @@
                 </div>
             </div>
         </div>
-        <table class="table table-striped text-center">
-            <thead class="thead-dark justify-content-center">
-                <tr>
-                    <th>OPÇÃO</th>
-                    <th>CÓDIGO</th>
-                    <th>STATUS</th>
-                    <th>FEITO?</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pedido in pedidos %}
-                <tr class="{{'table-success' if pedido.status == 'pronto'}}"  >
-                    <!--<td >{{ pedido.id }}</td>-->
-                    <td class="align-middle">{{ pedido.opcao }}</td>
-                    <td class="align-middle">{{ pedido.codigo }}</td>
-                    <td class="align-middle">{{ pedido.status }}</td>
-                    <td>
-                        {% if pedido.status != 'pronto' %}
-                        <a href="{{url_for('marcar_pronto') }}?id={{pedido.id}}">
-                            <button type="button" class="btn btn-success">Pronto</button>
-                        </a>
-                        {% else %}
-                        <button type="button" class="btn btn-light" disabled>Pronto</button>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="d-flex justify-content-center">
+            <table class="table table-striped text-center" style="max-width: 98vw; width: auto;">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Salada 1</th>
+                        <th>Salada 2</th>
+                        <th>Prato Principal</th>
+                        <th>Vegetariano</th>
+                        <th>Guarnição 1</th>
+                        <th>Guarnição 2</th>
+                        <th>Acompanhamento 1</th>
+                        <th>Acompanhamento 2</th>
+                        <th>Acompanhamento 3</th>
+                        <th>Sobremesa 1</th>
+                        <th>Sobremesa 2</th>
+                        <th>Código</th>
+                        <th>Status</th>
+                        <th>Dia</th>
+                        <th>Noite</th>
+                        <th>FEITO?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr class="{{'table-success' if pedido.status == 'pronto'}}">
+                        <td class="align-middle">{{ pedido.salada1 or '' }}</td>
+                        <td class="align-middle">{{ pedido.salada2 or '' }}</td>
+                        <td class="align-middle">{{ pedido.prato_principal or '' }}</td>
+                        <td class="align-middle">{{ pedido.vegetariano or '' }}</td>
+                        <td class="align-middle">{{ pedido.guarnicao1 or '' }}</td>
+                        <td class="align-middle">{{ pedido.guarnicao2 or '' }}</td>
+                        <td class="align-middle">{{ pedido.acompanhamento1 or '' }}</td>
+                        <td class="align-middle">{{ pedido.acompanhamento2 or '' }}</td>
+                        <td class="align-middle">{{ pedido.acompanhamento3 or '' }}</td>
+                        <td class="align-middle">{{ pedido.sobremesa1 or '' }}</td>
+                        <td class="align-middle">{{ pedido.sobremesa2 or '' }}</td>
+                        <td class="align-middle">{{ pedido.codigo }}</td>
+                        <td class="align-middle">{{ pedido.status }}</td>
+                        <td class="align-middle">{{ pedido.dia }}</td>
+                        <td class="align-middle">{{ pedido.noite }}</td>
+                        <td>
+                            {% if pedido.status != 'pronto' %}
+                            <a href="{{url_for('marcar_pronto') }}?id={{pedido.codigo}}">
+                                <button type="button" class="btn btn-success">Pronto</button>
+                            </a>
+                            {% else %}
+                            <button type="button" class="btn btn-light" disabled>Pronto</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>

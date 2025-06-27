@@ -19,9 +19,12 @@ CREATE TABLE IF NOT EXISTS pedidos (
     acompanhamento3 TEXT,
     sobremesa1 TEXT,
     sobremesa2 TEXT,
-    codigo INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT PRIMARY KEY,
     status TEXT DEFAULT 'preparando',
-    dia_noite TEXT
+    dia BOOLEAN,
+    noite BOOLEAN,
+    timestamp_pronto DATETIME
+
 )
 ''')
 

@@ -1,6 +1,7 @@
 from flask import Flask, make_response, jsonify, render_template, redirect, url_for, request, flash, session
 import sqlite3
 from datetime import datetime, timedelta
+import random
 
 app = Flask(__name__)
 
@@ -61,33 +62,26 @@ def aluno_serv():
 
 @app.route('/obter', methods=['GET'])
 def obter_pedidos():
-    # Conectando ao banco de dados
     conn = sqlite3.connect('db/pedidos.db')
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    # Consultando todos os pedidos
     cursor.execute('SELECT * FROM pedidos')
-    pedidos = cursor.fetchall()
-    # Fechando a conexão
+    pedidos = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    # Convertendo os dados para um formato de lista de dicionários
-    pedidos_json = [
-        {'id': pedido[0], 'opcao': pedido[1], 'codigo': pedido[2], 'status': pedido[3]}
-        for pedido in pedidos
-    ]
-    return pedidos_json
+    return pedidos
 
-def atualizar_pedido(pedido_id):
+def atualizar_pedido(pedido_codigo):
     conn = sqlite3.connect('db/pedidos.db')
     cursor = conn.cursor()
     timestamp = datetime.now()
-    cursor.execute('UPDATE pedidos SET status = ?, timestamp_pronto = ? WHERE id = ?', ('pronto', timestamp, pedido_id))
+    cursor.execute('UPDATE pedidos SET status = ?, timestamp_pronto = ? WHERE codigo = ?', ('pronto', timestamp, pedido_codigo))
     conn.commit()
     conn.close()
 
 @app.route('/marcar_pronto/', methods = ['GET'])
 def marcar_pronto():
-    pedido_id = request.args.get('id',type=int)
-    atualizar_pedido(pedido_id)
+    pedido_codigo = request.args.get('id')  # 'id' na URL é o codigo do pedido
+    atualizar_pedido(pedido_codigo)
     return redirect(url_for('index'))
 
 @app.route('/deletar_prontos', methods=['POST'])
@@ -168,11 +162,117 @@ def cardapio_dia():
                     "Não preenchido", "Não preenchido", "Não preenchido", current_date)
     return render_template('cardapio_dia.html', cardapio=cardapio)
 
+@app.route('/criar_pedido', methods=['POST'])
+def criar_pedido():
+    # Coleta correta dos campos do formulário
+    saladas = request.form.getlist('saladas')
+    salada1 = saladas[0] if len(saladas) > 0 else None
+    salada2 = saladas[1] if len(saladas) > 1 else None
+
+    acompanhamentos = request.form.getlist('acompanhamentos')
+    acompanhamento1 = acompanhamentos[0] if len(acompanhamentos) > 0 else None
+    acompanhamento2 = acompanhamentos[1] if len(acompanhamentos) > 1 else None
+    acompanhamento3 = acompanhamentos[2] if len(acompanhamentos) > 2 else None
+
+    # Recupere o cardápio do dia novamente
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    conn_cardapio = sqlite3.connect('db/cardapio.db')
+    cursor_cardapio = conn_cardapio.cursor()
+    cursor_cardapio.execute("SELECT * FROM cardapio WHERE date(dia) = ?", (current_date,))
+    cardapio = cursor_cardapio.fetchone()
+    conn_cardapio.close()
+
+    # Prato principal e vegetariano
+    prato_veg = request.form.get('prato_veg')
+    prato_principal = prato_veg if cardapio and prato_veg == cardapio[3] else None
+    vegetariano = prato_veg if cardapio and prato_veg == cardapio[4] else None
+
+    # Guarnições
+    guarnicao = request.form.get('guarnicao')
+    guarnicao1 = guarnicao if cardapio and guarnicao == cardapio[5] else None
+    guarnicao2 = guarnicao if cardapio and guarnicao == cardapio[6] else None
+
+    # Sobremesas
+    sobremesa = request.form.get('sobremesa')
+    sobremesa1 = sobremesa if cardapio and sobremesa == cardapio[10] else None
+    sobremesa2 = sobremesa if cardapio and sobremesa == cardapio[11] else None
+
+    refeicao = request.form.get('refeicao')
+    dia = True if refeicao == "Almoço" else False
+    noite = True if refeicao == "Jantar" else False
+
+    # Gera código único
+    conn_pedidos = sqlite3.connect('db/pedidos.db')
+    cursor_pedidos = conn_pedidos.cursor()
+    while True:
+        codigo = str(random.randint(10**9, 10**10 - 1))
+        cursor_pedidos.execute('SELECT 1 FROM pedidos WHERE codigo = ?', (codigo,))
+        if not cursor_pedidos.fetchone():
+            break
+
+    cursor_pedidos.execute('''
+        INSERT INTO pedidos (
+            salada1, salada2, prato_principal, vegetariano,
+            guarnicao1, guarnicao2,
+            acompanhamento1, acompanhamento2, acompanhamento3,
+            sobremesa1, sobremesa2,
+            codigo, status, dia, noite
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        salada1, salada2,
+        prato_principal, vegetariano,
+        guarnicao1, guarnicao2,
+        acompanhamento1, acompanhamento2, acompanhamento3,
+        sobremesa1, sobremesa2,
+        codigo,
+        'preparando',
+        int(dia),
+        int(noite)
+    ))
+    conn_pedidos.commit()
+    conn_pedidos.close()
+    session['pedido_numero'] = codigo
+    return redirect(url_for('tela_qr_code'))
+
 @app.route('/tela_qr_code')
 def tela_qr_code():
     matricula = session.get('matricula')
     nome = None
     categoria = None
+    valor = "R$ 3,00"
+    pedido_numero = session.get('pedido_numero')
+    if matricula:
+        conn = sqlite3.connect('db/alunos.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT Nome, Categoria FROM alunos WHERE Matricula = ?', (matricula,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            nome = row[0]
+            categoria = row[1]
+            if categoria == "Cotista":
+                valor = "R$ 2,00"
+            elif categoria == "Servidor":
+                valor = "R$ 14,50"
+            else:
+                valor = "R$ 3,00"
+    # Se não veio da sessão, gera um novo número (fallback)
+    if not pedido_numero:
+        conn_pedidos = sqlite3.connect('db/pedidos.db')
+        cursor_pedidos = conn_pedidos.cursor()
+        while True:
+            pedido_numero = str(random.randint(10**9, 10**10 - 1))
+            cursor_pedidos.execute('SELECT 1 FROM pedidos WHERE codigo = ?', (pedido_numero,))
+            if not cursor_pedidos.fetchone():
+                break
+        conn_pedidos.close()
+    return render_template('TELA_QR_CODE.html', nome=nome, matricula=matricula, valor=valor, pedido_numero=pedido_numero)
+
+@app.route('/tela_pagamento')
+def tela_pagamento():
+    matricula = session.get('matricula')
+    pedido_numero = session.get('pedido_numero')
+    nome = None
     valor = "R$ 3,00"
     if matricula:
         conn = sqlite3.connect('db/alunos.db')
@@ -189,10 +289,6 @@ def tela_qr_code():
                 valor = "R$ 14,50"
             else:
                 valor = "R$ 3,00"
-    return render_template('TELA_QR_CODE.html', nome=nome, matricula=matricula, valor=valor)
-
-@app.route('/tela_pagamento')
-def tela_pagamento():
-    return render_template('Tela_pagamento.html')
+    return render_template('Tela_pagamento.html', nome=nome, matricula=matricula, valor=valor, pedido_numero=pedido_numero)
 
 app.run(debug=True)

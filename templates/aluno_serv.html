@@ -36,7 +36,7 @@
     <!-- Seção Cardápio -->
     <div id="cardapioSection" class="section active">
       <h3 class="text-center mb-4">Escolha seu Cardápio</h3>
-      <form action="#" method="post">
+      <form action="{{ url_for('criar_pedido') }}" method="post">
         <!-- Saladas (checkboxes) -->
         <div class="form-group">
           <label>Saladas:</label><br>
@@ -115,8 +115,7 @@
         </div>
         <!-- Botão de Pagar -->
         <div class="text-center">
-          <!-- <button type="button" class="btn btn-success" onclick="window.location.href='{{ url_for('tela_qr_code') }}'">Pagar</button> -->
-          <div class="text-center"><a href="{{ url_for('tela_qr_code') }}" class="btn btn-success">Pagar</a></div>
+          <button type="submit" class="btn btn-success">Pagar</button>
         </div>
       </form>
     </div>

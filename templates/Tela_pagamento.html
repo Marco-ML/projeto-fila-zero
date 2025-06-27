@@ -98,10 +98,10 @@
         Seu pagamento via PIX foi confirmado com sucesso.
       </div>
       <div class="info">
-        <strong>Nome:</strong> Nome do Aluno<br />
-        <strong>Matrícula:</strong> 1234567891011<br />
-        <strong>Valor:</strong> R$ 3,00<br />
-        <strong>Pedido:</strong> #12345
+        <strong>Nome:</strong> {{ nome if nome else 'Nome do Aluno' }}<br />
+        <strong>Matrícula:</strong> {{ matricula if matricula else '1234567891011' }}<br />
+        <strong>Valor:</strong> {{ valor if valor else 'R$ 3,00' }}<br />
+        <strong>Pedido:</strong> #{{ pedido_numero if pedido_numero else '12345' }}
       </div>
         <button class="button" onclick="window.location.href=`{{ url_for('aluno_serv') }}`;">Voltar ao início</button>
 
