@@ -1,4 +1,5 @@
 import sqlite3
+import random
 
 # Conectando ao banco de dados (ou criando, se não existir)
 conn = sqlite3.connect('db/alunos.db')
@@ -234,7 +235,11 @@ INSERT INTO alunos (Matricula, Nome, Dia, Noite) VALUES
 ('202202691738', 'Michele Barros Moraes', NULL, NULL);
 
 ALTER TABLE alunos ADD COLUMN Categoria VARCHAR(30);
+ALTER TABLE alunos ADD COLUMN Senha VARCHAR(8);
+''')
 
+# Popula Categoria
+cursor.execute('''
 UPDATE alunos
 SET Categoria = CASE
     WHEN RANDOM() < 0.05 THEN 'Servidor'
@@ -242,6 +247,18 @@ SET Categoria = CASE
     ELSE 'Ampla Concorrência'
 END;
 ''')
+
+# Popula Senha com números aleatórios de 8 dígitos
+cursor.execute('SELECT Matricula FROM alunos')
+matriculas = cursor.fetchall()
+for (matricula,) in matriculas:
+    senha = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+    cursor.execute('UPDATE alunos SET Senha = ? WHERE Matricula = ?', (senha, matricula))
+
+
+cursor.execute('UPDATE alunos SET Senha = "12345678" WHERE Matricula = "201981189742"')
+cursor.execute('UPDATE alunos SET Senha = "11110000" WHERE Matricula = "202073914308"')
+cursor.execute('UPDATE alunos SET Senha = "10101010" WHERE Matricula = "202229101261"')
 
 # Comitando as mudanças e fechando a conexão
 conn.commit()

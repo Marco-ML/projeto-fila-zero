@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <!-- ...existing head code... -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <meta charset="UTF-8">
+  <title>Login - Fila Zero</title>
   <style>
-    body {
-      background-color: #f7f7f7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
+    #form-cozinha, #form-aluno {
+      display: none;
+      margin-top: 1em;
+    }
+    .error {
+      color: red;
+      margin-top: 0.5em;
     }
     .login-container {
       background: #fff;
@@ -21,8 +19,9 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       width: 300px;
       text-align: center;
+      margin: 40px auto;
     }
-    .login-container button {
+    button {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -33,20 +32,108 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .login-container button:hover {
+    button:hover {
       background: #0026a3;
+    }
+    input[type="text"], input[type="password"] {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
     }
   </style>
 </head>
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <form action="/login" method="post">
-      <p>Escolha uma opção:</p>
-      <button type="submit" name="role" value="cozinha">Entrar como Cozinha</button>
-      <button type="submit" name="role" value="aluno_serv">Entrar como Aluno/Servidor</button>
-    </form>
+    <p>Escolha uma opção:</p>
+    <button id="btn-cozinha" type="button">Entrar como Cozinha</button>
+    <button id="btn-aluno" type="button">Entrar como Aluno/Servidor</button>
+
+    <!-- Formulário Cozinha -->
+    <div id="form-cozinha">
+      <h3>Login Cozinha</h3>
+      <input type="text" id="user-cozinha" placeholder="Usuário">
+      <input type="password" id="pass-cozinha" placeholder="Senha">
+      <button id="login-cozinha" type="button">Entrar</button>
+      <div id="error-cozinha" class="error"></div>
+    </div>
+
+    <!-- Formulário Aluno/Servidor -->
+    <div id="form-aluno">
+      <h3>Login Aluno/Servidor</h3>
+      <form id="aluno-form" method="post" action="/login" autocomplete="off" onsubmit="return validarAluno();">
+        <input type="hidden" name="role" value="aluno_serv">
+        <input type="text" id="user-aluno" name="matricula" placeholder="Matrícula" required>
+        <input type="password" id="pass-aluno" name="senha" placeholder="Senha" required>
+        <button id="login-aluno" type="submit">Entrar</button>
+        <div id="error-aluno" class="error"></div>
+      </form>
+      <div style="font-size:12px;color:#888;margin-top:8px;">(Use sua matrícula e senha cadastrada)</div>
+    </div>
   </div>
-  <!-- ...existing body code... -->
+  <script>
+    const btnCozinha = document.getElementById('btn-cozinha');
+    const btnAluno = document.getElementById('btn-aluno');
+    const formCozinha = document.getElementById('form-cozinha');
+    const formAluno = document.getElementById('form-aluno');
+    const errorCozinha = document.getElementById('error-cozinha');
+
+    btnCozinha.addEventListener('click', () => {
+      formCozinha.style.display = 'block';
+      formAluno.style.display = 'none';
+      errorCozinha.textContent = '';
+      document.getElementById('user-cozinha').value = '';
+      document.getElementById('pass-cozinha').value = '';
+    });
+
+    btnAluno.addEventListener('click', () => {
+      formAluno.style.display = 'block';
+      formCozinha.style.display = 'none';
+      document.getElementById('error-aluno').textContent = '';
+      document.getElementById('user-aluno').value = '';
+      document.getElementById('pass-aluno').value = '';
+    });
+
+    document.getElementById('login-cozinha').addEventListener('click', () => {
+      const user = document.getElementById('user-cozinha').value.trim();
+      const pass = document.getElementById('pass-cozinha').value.trim();
+      if (user === 'user' && pass === '123') {
+        window.location.href = '/index';
+      } else {
+        errorCozinha.textContent = 'Usuário e/ou Senha incorreta(s)';
+      }
+    });
+
+    document.getElementById('aluno-form').addEventListener('submit', function(e) {
+      // Limpa erro antes do submit, o backend pode redirecionar com flash se necessário
+      document.getElementById('error-aluno').textContent = '';
+    });
+
+    function validarAluno() {
+      // Permite submit, mas se o backend retornar erro, exibe mensagem via flash
+      return true;
+    }
+
+    // Exibe mensagem de erro do backend (flash) se houver
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        var msg = {{ messages[0]|tojson }};
+        if (msg.includes("Matrícula") || msg.includes("Usuário")) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('form-aluno').style.display = 'block';
+            document.getElementById('form-cozinha').style.display = 'none';
+            document.getElementById('error-aluno').textContent = msg.replace("Matrícula", "Usuário");
+          });
+        }
+        if (msg.includes("Cozinha")) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('form-cozinha').style.display = 'block';
+            document.getElementById('form-aluno').style.display = 'none';
+            document.getElementById('error-cozinha').textContent = "Usuário e/ou Senha incorreta(s)";
+          });
+        }
+      {% endif %}
+    {% endwith %}
+  </script>
 </body>
 </html>

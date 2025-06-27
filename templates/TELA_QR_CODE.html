@@ -113,9 +113,9 @@
     <div class="timer" id="timer">Tempo restante: 05:00</div>
 
     <div class="info">
-      <p><strong>Nome:</strong> Nome do Aluno</p>
-      <p><strong>Matrícula:</strong> 1234567891011</p>
-      <p><strong>Valor:</strong> R$ 3,00</p>
+      <p><strong>Nome:</strong> {{ nome if nome else 'Nome do Aluno' }}</p>
+      <p><strong>Matrícula:</strong> {{ matricula if matricula else '1234567891011' }}</p>
+      <p><strong>Valor:</strong> {{ valor if valor else 'R$ 3,00' }}</p>
       <p><strong>Descrição:</strong> Pagamento do pedido #12345</p>
     </div>
 

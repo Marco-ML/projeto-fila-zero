@@ -20,7 +20,7 @@ CREATE TABLE cardapio (
     acompanhamento3 TEXT NOT NULL,
     sobremesa1 TEXT NOT NULL,
     sobremesa2 TEXT NOT NULL,
-    dia DATETIME DEFAULT CURRENT_TIMESTAMP
+    dia DATETIME DEFAULT (datetime('now', '-3 hours'))
 );
 ''')
 

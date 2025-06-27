@@ -1,4 +1,4 @@
-from flask import Flask, make_response, jsonify, render_template, redirect, url_for, request, flash
+from flask import Flask, make_response, jsonify, render_template, redirect, url_for, request, flash, session
 import sqlite3
 from datetime import datetime, timedelta
 
@@ -18,7 +18,19 @@ def realizar_login():
     if role == 'cozinha':
         return redirect(url_for('index'))
     elif role == 'aluno_serv':
-        return redirect(url_for('aluno_serv'))
+        matricula = request.form.get('matricula')
+        senha = request.form.get('senha')
+        conn = sqlite3.connect('db/alunos.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT Senha FROM alunos WHERE Matricula = ?', (matricula,))
+        row = cursor.fetchone()
+        conn.close()
+        if row and row[0] == senha:
+            session['matricula'] = matricula  # Salva a matrícula na sessão
+            return redirect(url_for('aluno_serv'))
+        else:
+            flash('Usuário e/ou Senha incorreta(s)')
+            return redirect(url_for('login'))
     else:
         flash('Escolha uma opção válida!')
         return redirect(url_for('login'))
@@ -32,6 +44,7 @@ def index():
 @app.route('/aluno_serv')
 def aluno_serv():
     from datetime import datetime
+    matricula = session.get('matricula')
     current_date = datetime.now().strftime("%Y-%m-%d")
     conn = sqlite3.connect('db/cardapio.db')
     cursor = conn.cursor()
@@ -44,7 +57,7 @@ def aluno_serv():
         cardapio = (0, "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
                     "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
                     "Não preenchido", "Não preenchido", "Não preenchido", current_date)
-    return render_template('aluno_serv.html', cardapio=cardapio)
+    return render_template('aluno_serv.html', cardapio=cardapio, matricula=matricula)
 
 @app.route('/obter', methods=['GET'])
 def obter_pedidos():
@@ -157,7 +170,26 @@ def cardapio_dia():
 
 @app.route('/tela_qr_code')
 def tela_qr_code():
-    return render_template('TELA_QR_CODE.html')
+    matricula = session.get('matricula')
+    nome = None
+    categoria = None
+    valor = "R$ 3,00"
+    if matricula:
+        conn = sqlite3.connect('db/alunos.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT Nome, Categoria FROM alunos WHERE Matricula = ?', (matricula,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            nome = row[0]
+            categoria = row[1]
+            if categoria == "Cotista":
+                valor = "R$ 2,00"
+            elif categoria == "Servidor":
+                valor = "R$ 14,50"
+            else:
+                valor = "R$ 3,00"
+    return render_template('TELA_QR_CODE.html', nome=nome, matricula=matricula, valor=valor)
 
 @app.route('/tela_pagamento')
 def tela_pagamento():
