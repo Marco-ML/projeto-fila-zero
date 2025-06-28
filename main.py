@@ -274,12 +274,15 @@ def tela_pagamento():
     pedido_numero = session.get('pedido_numero')
     nome = None
     valor = "R$ 3,00"
-    if matricula:
+    dia = None
+    noite = None
+
+    if matricula and pedido_numero:
+        # Busca nome e categoria
         conn = sqlite3.connect('db/alunos.db')
         cursor = conn.cursor()
         cursor.execute('SELECT Nome, Categoria FROM alunos WHERE Matricula = ?', (matricula,))
         row = cursor.fetchone()
-        conn.close()
         if row:
             nome = row[0]
             categoria = row[1]
@@ -289,6 +292,26 @@ def tela_pagamento():
                 valor = "R$ 14,50"
             else:
                 valor = "R$ 3,00"
+        conn.close()
+
+        # Busca se o pedido é almoço ou jantar
+        conn_pedidos = sqlite3.connect('db/pedidos.db')
+        cursor_pedidos = conn_pedidos.cursor()
+        cursor_pedidos.execute('SELECT dia, noite FROM pedidos WHERE codigo = ?', (pedido_numero,))
+        row_pedido = cursor_pedidos.fetchone()
+        conn_pedidos.close()
+        if row_pedido:
+            dia, noite = row_pedido
+            # Atualiza o campo Dia ou Noite do aluno
+            conn = sqlite3.connect('db/alunos.db')
+            cursor = conn.cursor()
+            if dia:
+                cursor.execute('UPDATE alunos SET Dia = ? WHERE Matricula = ?', (pedido_numero, matricula))
+            elif noite:
+                cursor.execute('UPDATE alunos SET Noite = ? WHERE Matricula = ?', (pedido_numero, matricula))
+            conn.commit()
+            conn.close()
+
     return render_template('Tela_pagamento.html', nome=nome, matricula=matricula, valor=valor, pedido_numero=pedido_numero)
 
 app.run(debug=True)
