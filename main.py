@@ -68,6 +68,20 @@ def obter_pedidos():
     cursor.execute('SELECT * FROM pedidos')
     pedidos = [dict(row) for row in cursor.fetchall()]
     conn.close()
+
+    # Adiciona o nome do aluno a cada pedido
+    conn_alunos = sqlite3.connect('db/alunos.db')
+    cursor_alunos = conn_alunos.cursor()
+    for pedido in pedidos:
+        matricula = pedido.get('matricula')
+        nome = None
+        if matricula:
+            cursor_alunos.execute('SELECT Nome FROM alunos WHERE Matricula = ?', (matricula,))
+            row = cursor_alunos.fetchone()
+            if row:
+                nome = row[0]
+        pedido['nome'] = nome if nome else ''
+    conn_alunos.close()
     return pedidos
 
 def atualizar_pedido(pedido_codigo):
@@ -142,6 +156,13 @@ def cadastrar_cardapio():
     conn.commit()
     conn.close()
     
+    # Limpa as colunas Dia e Noite de todos os alunos
+    conn_alunos = sqlite3.connect('db/alunos.db')
+    cursor_alunos = conn_alunos.cursor()
+    cursor_alunos.execute('UPDATE alunos SET Dia = NULL, Noite = NULL')
+    conn_alunos.commit()
+    conn_alunos.close()
+
     flash('Cardápio cadastrado com sucesso!')
     return redirect(url_for('cardapio'))
 
@@ -201,6 +222,27 @@ def criar_pedido():
     dia = True if refeicao == "Almoço" else False
     noite = True if refeicao == "Jantar" else False
 
+    matricula = session.get('matricula')
+
+    # Verificação: já existe pedido para esse aluno nesse turno?
+    conn_alunos = sqlite3.connect('db/alunos.db')
+    cursor_alunos = conn_alunos.cursor()
+    if dia:
+        cursor_alunos.execute('SELECT Dia FROM alunos WHERE Matricula = ?', (matricula,))
+        valor = cursor_alunos.fetchone()
+        if valor and valor[0]:
+            flash('Pedido já foi feito')
+            conn_alunos.close()
+            return redirect(url_for('aluno_serv'))
+    elif noite:
+        cursor_alunos.execute('SELECT Noite FROM alunos WHERE Matricula = ?', (matricula,))
+        valor = cursor_alunos.fetchone()
+        if valor and valor[0]:
+            flash('Pedido já foi feito')
+            conn_alunos.close()
+            return redirect(url_for('aluno_serv'))
+    conn_alunos.close()
+
     # Gera código único
     conn_pedidos = sqlite3.connect('db/pedidos.db')
     cursor_pedidos = conn_pedidos.cursor()
@@ -216,8 +258,8 @@ def criar_pedido():
             guarnicao1, guarnicao2,
             acompanhamento1, acompanhamento2, acompanhamento3,
             sobremesa1, sobremesa2,
-            codigo, status, dia, noite
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            codigo, status, dia, noite, matricula
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         salada1, salada2,
         prato_principal, vegetariano,
@@ -227,7 +269,8 @@ def criar_pedido():
         codigo,
         'preparando',
         int(dia),
-        int(noite)
+        int(noite),
+        matricula
     ))
     conn_pedidos.commit()
     conn_pedidos.close()

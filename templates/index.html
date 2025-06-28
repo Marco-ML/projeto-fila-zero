@@ -38,6 +38,7 @@
             <table class="table table-striped text-center" style="max-width: 98vw; width: auto;">
                 <thead class="thead-dark">
                     <tr>
+                        <th>Nome</th>
                         <th>Salada 1</th>
                         <th>Salada 2</th>
                         <th>Prato Principal</th>
@@ -59,6 +60,7 @@
                 <tbody>
                     {% for pedido in pedidos %}
                     <tr class="{{'table-success' if pedido.status == 'pronto'}}">
+                        <td class="align-middle">{{ pedido.nome or '' }}</td>
                         <td class="align-middle">{{ pedido.salada1 or '' }}</td>
                         <td class="align-middle">{{ pedido.salada2 or '' }}</td>
                         <td class="align-middle">{{ pedido.prato_principal or '' }}</td>

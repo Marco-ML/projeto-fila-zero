@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS pedidos (
     status TEXT DEFAULT 'preparando',
     dia BOOLEAN,
     noite BOOLEAN,
-    timestamp_pronto DATETIME
+    timestamp_pronto DATETIME,
+    matricula TEXT
 
 )
 ''')
