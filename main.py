@@ -53,12 +53,20 @@ def aluno_serv():
     cardapio = cursor.fetchone()
     conn.close()
     if not cardapio:
-        # Dummy tuple: (id, salada1, salada2, prato_principal, vegetariano, guarnicao1, guarnicao2, 
-        # acompanhamento1, acompanhamento2, acompanhamento3, sobremesa1, sobremesa2, dia)
         cardapio = (0, "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
                     "Não preenchido", "Não preenchido", "Não preenchido", "Não preenchido",
                     "Não preenchido", "Não preenchido", "Não preenchido", current_date)
-    return render_template('aluno_serv.html', cardapio=cardapio, matricula=matricula)
+    # Busca todos os avisos do banco avisos.db (mais recentes primeiro)
+    avisos = []
+    try:
+        conn_aviso = sqlite3.connect('db/avisos.db')
+        cursor_aviso = conn_aviso.cursor()
+        cursor_aviso.execute("SELECT data, mensagem FROM avisos ORDER BY id DESC")
+        avisos = cursor_aviso.fetchall()
+        conn_aviso.close()
+    except Exception:
+        avisos = []
+    return render_template('aluno_serv.html', cardapio=cardapio, matricula=matricula, avisos=avisos)
 
 @app.route('/obter', methods=['GET'])
 def obter_pedidos():
@@ -119,10 +127,19 @@ def aviso():
 @app.route('/enviar_mensagem', methods=['POST'])
 def enviar_mensagem():
     mensagem = request.form.get('mensagem')
-    # Lógica para processar a mensagem (por exemplo, salvar no banco de dados)
-
-    # Envia a mensagem de feedback
-    flash('Sua mensagem foi enviada com sucesso!')
+    if mensagem and mensagem.strip():
+        # Salva o aviso no banco de dados avisos.db
+        conn = sqlite3.connect('db/avisos.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO avisos (data, mensagem) VALUES (datetime('now', '-3 hours'), ?)",
+            (mensagem.strip(),)
+        )
+        conn.commit()
+        conn.close()
+        flash('Sua mensagem foi enviada com sucesso!')
+    else:
+        flash('Digite uma mensagem para enviar.')
     return render_template('aviso.html')
 
 @app.route('/cardapio')

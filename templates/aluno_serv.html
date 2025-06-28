@@ -37,8 +37,8 @@
 
     <!-- Navigation para alternar entre Cardápio e Avisos -->
     <div class="nav-buttons text-center">
-      <button class="btn btn-primary" onclick="showSection('cardapioSection')">Cardápio</button>
-      <button class="btn btn-secondary" onclick="showSection('avisosSection')">Avisos</button>
+      <button id="btnCardapio" class="btn btn-primary" onclick="showSection('cardapioSection')">Cardápio</button>
+      <button id="btnAvisos" class="btn btn-secondary" onclick="showSection('avisosSection')">Avisos</button>
     </div>
 
     <!-- Seção Cardápio -->
@@ -131,9 +131,20 @@
     <!-- Seção Avisos -->
     <div id="avisosSection" class="section">
       <h3 class="text-center mb-4">Avisos</h3>
-      <div class="alert alert-info" role="alert">
-        Nenhum aviso no momento.
-      </div>
+      {% if avisos and avisos|length > 0 %}
+        {% for data, mensagem in avisos %}
+          <div class="alert alert-danger" role="alert" style="margin-bottom: 10px; font-size: 1.25em;">
+            <strong>
+              {{ data[:10].split('-')[2] }}/{{ data[:10].split('-')[1] }}/{{ data[:10].split('-')[0] }}:
+            </strong>
+            {{ mensagem }}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-info" role="alert" style="font-size: 1.25em;">
+          Nenhum aviso no momento.
+        </div>
+      {% endif %}
     </div>
   </div>
 
@@ -142,7 +153,25 @@
       document.getElementById('cardapioSection').classList.remove('active');
       document.getElementById('avisosSection').classList.remove('active');
       document.getElementById(sectionId).classList.add('active');
+
+      // Troca as cores dos botões conforme a aba ativa
+      if (sectionId === 'cardapioSection') {
+        document.getElementById('btnCardapio').classList.remove('btn-secondary');
+        document.getElementById('btnCardapio').classList.add('btn-primary');
+        document.getElementById('btnAvisos').classList.remove('btn-primary');
+        document.getElementById('btnAvisos').classList.add('btn-secondary');
+      } else {
+        document.getElementById('btnAvisos').classList.remove('btn-secondary');
+        document.getElementById('btnAvisos').classList.add('btn-primary');
+        document.getElementById('btnCardapio').classList.remove('btn-primary');
+        document.getElementById('btnCardapio').classList.add('btn-secondary');
+      }
     }
+
+    // Garante que ao carregar a página, o botão Cardápio está azul e Avisos cinza
+    document.addEventListener('DOMContentLoaded', function() {
+      showSection('cardapioSection');
+    });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
