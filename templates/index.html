@@ -35,6 +35,10 @@
             </div>
         </div>
         <div class="d-flex justify-content-center">
+            <!-- Botão para alternar entre Almoço e Jantar -->
+            <button id="turnoBtn" class="btn btn-info mb-3" onclick="toggleTurno()">Almoço</button>
+        </div>
+        <div class="d-flex justify-content-center">
             <table class="table table-striped text-center" style="max-width: 98vw; width: auto;">
                 <thead class="thead-dark">
                     <tr>
@@ -52,14 +56,13 @@
                         <th>Sobremesa 2</th>
                         <th>Código</th>
                         <th>Status</th>
-                        <th>Dia</th>
-                        <th>Noite</th>
                         <th>FEITO?</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="pedidosBody">
                     {% for pedido in pedidos %}
-                    <tr class="{{'table-success' if pedido.status == 'pronto'}}">
+                    <tr class="{{'table-success' if pedido.status == 'pronto'}}"
+                        data-dia="{{ pedido.dia }}" data-noite="{{ pedido.noite }}">
                         <td class="align-middle">{{ pedido.nome or '' }}</td>
                         <td class="align-middle">{{ pedido.salada1 or '' }}</td>
                         <td class="align-middle">{{ pedido.salada2 or '' }}</td>
@@ -74,8 +77,6 @@
                         <td class="align-middle">{{ pedido.sobremesa2 or '' }}</td>
                         <td class="align-middle">{{ pedido.codigo }}</td>
                         <td class="align-middle">{{ pedido.status }}</td>
-                        <td class="align-middle">{{ pedido.dia }}</td>
-                        <td class="align-middle">{{ pedido.noite }}</td>
                         <td>
                             {% if pedido.status != 'pronto' %}
                             <a href="{{url_for('marcar_pronto') }}?id={{pedido.codigo}}">
@@ -91,5 +92,36 @@
             </table>
         </div>
     </div>
+<script>
+    // Inicialmente mostra apenas pedidos de Almoço (dia==1)
+    function filterPedidos(turno) {
+        const rows = document.querySelectorAll('#pedidosBody tr');
+        rows.forEach(row => {
+            const isDia = row.getAttribute('data-dia') === '1';
+            const isNoite = row.getAttribute('data-noite') === '1';
+            if (turno === 'Almoço') {
+                row.style.display = isDia ? '' : 'none';
+            } else {
+                row.style.display = isNoite ? '' : 'none';
+            }
+        });
+    }
+
+    function toggleTurno() {
+        const btn = document.getElementById('turnoBtn');
+        if (btn.textContent === 'Almoço') {
+            btn.textContent = 'Jantar';
+            filterPedidos('Jantar');
+        } else {
+            btn.textContent = 'Almoço';
+            filterPedidos('Almoço');
+        }
+    }
+
+    // Ao carregar a página, mostra apenas pedidos de Almoço
+    document.addEventListener('DOMContentLoaded', function() {
+        filterPedidos('Almoço');
+    });
+</script>
 </body>
 </html>
