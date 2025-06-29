@@ -4,13 +4,13 @@ import sqlite3
 conn = sqlite3.connect('db/avisos.db')
 cursor = conn.cursor()
 
-# Cria a tabela avisos
 cursor.executescript('''
 DROP TABLE IF EXISTS avisos;
 CREATE TABLE avisos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data DATETIME DEFAULT (datetime('now', '-3 hours')),
-    mensagem TEXT NOT NULL
+    mensagem TEXT NOT NULL,
+    vigente BOOLEAN DEFAULT 1
 );
 ''')
 

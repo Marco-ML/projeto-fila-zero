@@ -61,7 +61,7 @@ def aluno_serv():
     try:
         conn_aviso = sqlite3.connect('db/avisos.db')
         cursor_aviso = conn_aviso.cursor()
-        cursor_aviso.execute("SELECT data, mensagem FROM avisos ORDER BY id DESC")
+        cursor_aviso.execute("SELECT id, data, mensagem FROM avisos WHERE vigente = 1 ORDER BY id DESC")
         avisos = cursor_aviso.fetchall()
         conn_aviso.close()
     except Exception:
@@ -122,7 +122,29 @@ def deletar_pedidos_prontos():
 
 @app.route('/aviso')
 def aviso():
-    return render_template('aviso.html')
+    # Busca todos os avisos vigentes do banco avisos.db (mais recentes primeiro)
+    avisos = []
+    try:
+        conn_aviso = sqlite3.connect('db/avisos.db')
+        cursor_aviso = conn_aviso.cursor()
+        cursor_aviso.execute("SELECT id, data, mensagem FROM avisos WHERE vigente = 1 ORDER BY id DESC")
+        avisos = cursor_aviso.fetchall()
+        conn_aviso.close()
+    except Exception:
+        avisos = []
+    return render_template('aviso.html', avisos=avisos)
+
+@app.route('/apagar_aviso', methods=['POST'])
+def apagar_aviso():
+    aviso_id = request.args.get('aviso_id', type=int)
+    if aviso_id:
+        conn = sqlite3.connect('db/avisos.db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE avisos SET vigente = 0 WHERE id = ?", (aviso_id,))
+        conn.commit()
+        conn.close()
+        flash('Aviso apagado com sucesso!')
+    return redirect(url_for('aviso'))
 
 @app.route('/enviar_mensagem', methods=['POST'])
 def enviar_mensagem():
@@ -132,7 +154,7 @@ def enviar_mensagem():
         conn = sqlite3.connect('db/avisos.db')
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO avisos (data, mensagem) VALUES (datetime('now', '-3 hours'), ?)",
+            "INSERT INTO avisos (data, mensagem, vigente) VALUES (datetime('now', '-3 hours'), ?, 1)",
             (mensagem.strip(),)
         )
         conn.commit()
@@ -140,7 +162,17 @@ def enviar_mensagem():
         flash('Sua mensagem foi enviada com sucesso!')
     else:
         flash('Digite uma mensagem para enviar.')
-    return render_template('aviso.html')
+    # Após enviar, recarrega a lista de avisos
+    avisos = []
+    try:
+        conn_aviso = sqlite3.connect('db/avisos.db')
+        cursor_aviso = conn_aviso.cursor()
+        cursor_aviso.execute("SELECT id, data, mensagem FROM avisos WHERE vigente = 1 ORDER BY id DESC")
+        avisos = cursor_aviso.fetchall()
+        conn_aviso.close()
+    except Exception:
+        avisos = []
+    return render_template('aviso.html', avisos=avisos)
 
 @app.route('/cardapio')
 def cardapio():

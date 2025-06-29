@@ -47,7 +47,7 @@
       <form action="{{ url_for('criar_pedido') }}" method="post">
         <!-- Saladas (checkboxes) -->
         <div class="form-group">
-          <label>Saladas:</label><br>
+          <label><strong>Saladas:</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" name="saladas" id="salada1" value="{{ cardapio[1] }}">
             <label class="form-check-label" for="salada1">{{ cardapio[1] }}</label>
@@ -59,7 +59,7 @@
         </div>
         <!-- Acompanhamentos (checkboxes) -->
         <div class="form-group">
-          <label>Acompanhamentos:</label><br>
+          <label><strong>Acompanhamentos:</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" name="acompanhamentos" id="acompanhamento1" value="{{ cardapio[7] }}">
             <label class="form-check-label" for="acompanhamento1">{{ cardapio[7] }}</label>
@@ -75,7 +75,7 @@
         </div>
         <!-- Guarnições (radio - escolha única) -->
         <div class="form-group">
-          <label>Guarnições:</label><br>
+          <label><strong>Guarnições:</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="guarnicao" id="guarnicao1" value="{{ cardapio[5] }}" required>
             <label class="form-check-label" for="guarnicao1">{{ cardapio[5] }}</label>
@@ -87,7 +87,7 @@
         </div>
         <!-- Prato Principal vs Vegetariano (radio - escolha única) -->
         <div class="form-group">
-          <label>Opções:</label><br>
+          <label><strong>Prato Principal ou Vegetariano?</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="prato_veg" id="pratoPrincipal" value="{{ cardapio[3] }}" required>
             <label class="form-check-label" for="pratoPrincipal">{{ cardapio[3] }}</label>
@@ -99,7 +99,7 @@
         </div>
         <!-- Sobremesas (radio - escolha única) -->
         <div class="form-group">
-          <label>Sobremesas:</label><br>
+          <label><strong>Sobremesas:</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="sobremesa" id="sobremesa1" value="{{ cardapio[10] }}" required>
             <label class="form-check-label" for="sobremesa1">{{ cardapio[10] }}</label>
@@ -111,7 +111,7 @@
         </div>
         <!-- Nova opção: Almoço ou Jantar -->
         <div class="form-group">
-          <label>Almoço ou Jantar?</label><br>
+          <label><strong>Almoço ou Jantar?</strong></label><br>
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="refeicao" id="almoco" value="Almoço" required>
             <label class="form-check-label" for="almoco">Almoço</label>
@@ -132,7 +132,7 @@
     <div id="avisosSection" class="section">
       <h3 class="text-center mb-4">Avisos</h3>
       {% if avisos and avisos|length > 0 %}
-        {% for data, mensagem in avisos %}
+        {% for id, data, mensagem in avisos %}
           <div class="alert alert-danger" role="alert" style="margin-bottom: 10px; font-size: 1.25em;">
             <strong>
               {{ data[:10].split('-')[2] }}/{{ data[:10].split('-')[1] }}/{{ data[:10].split('-')[0] }}:
