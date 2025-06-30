@@ -169,7 +169,7 @@
                 {% else %}
                   está na posição:
                   <span style="font-weight:bold;">
-                    {{ loop.index if pedido.status != 'pronto' else '' }}
+                    {{ posicoes_fila[pedido.codigo] }}
                   </span>
                   da fila.
                 {% endif %}
@@ -188,7 +188,7 @@
                 {% else %}
                   está na posição:
                   <span style="font-weight:bold;">
-                    {{ loop.index if pedido.status != 'pronto' else '' }}
+                    {{ posicoes_fila[pedido.codigo] }}
                   </span>
                   da fila.
                 {% endif %}

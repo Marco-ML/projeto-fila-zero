@@ -95,7 +95,7 @@ def aluno_serv():
 
     # Busca pedidos do usuário do dia atual
     pedidos_usuario = []
-    posicao_fila = None
+    posicoes_fila = {}
     if matricula:
         conn_pedidos = sqlite3.connect('db/pedidos.db')
         conn_pedidos.row_factory = sqlite3.Row
@@ -106,23 +106,29 @@ def aluno_serv():
             (current_date,)
         )
         pedidos_do_dia = cursor_pedidos.fetchall()
-        # Filtra os pedidos do usuário
         pedidos_usuario = [dict(row) for row in pedidos_do_dia if row['matricula'] == matricula]
-        # Calcula a posição do pedido mais recente do usuário na fila
-        if pedidos_usuario:
-            pedido_usuario = pedidos_usuario[-1]  # Pega o mais recente do usuário
-            if pedido_usuario['status'] != 'pronto':
-                # Posição é o número de pedidos não prontos antes do pedido do usuário + 1
-                posicao = 1
-                for row in pedidos_do_dia:
-                    if row['status'] == 'pronto':
-                        continue
-                    if row['codigo'] == pedido_usuario['codigo']:
-                        break
-                    posicao += 1
-                posicao_fila = posicao
-            else:
-                posicao_fila = 0  # Pedido já está pronto
+
+        # Para cada pedido do usuário, calcula a posição correta na fila (considerando almoço/jantar)
+        for pedido in pedidos_usuario:
+            if pedido['status'] == 'pronto':
+                posicoes_fila[pedido['codigo']] = 0
+                continue
+            if pedido['dia'] == 1:
+                # Fila do almoço: pedidos do dia, status != pronto, dia == 1
+                fila_almoco = [row for row in pedidos_do_dia if row['dia'] == 1 and row['status'] != 'pronto']
+                codigos_fila = [row['codigo'] for row in fila_almoco]
+                try:
+                    posicoes_fila[pedido['codigo']] = codigos_fila.index(pedido['codigo']) + 1
+                except ValueError:
+                    posicoes_fila[pedido['codigo']] = "-"
+            elif pedido['noite'] == 1:
+                # Fila do jantar: pedidos do dia, status != pronto, noite == 1
+                fila_jantar = [row for row in pedidos_do_dia if row['noite'] == 1 and row['status'] != 'pronto']
+                codigos_fila = [row['codigo'] for row in fila_jantar]
+                try:
+                    posicoes_fila[pedido['codigo']] = codigos_fila.index(pedido['codigo']) + 1
+                except ValueError:
+                    posicoes_fila[pedido['codigo']] = "-"
         conn_pedidos.close()
 
     return render_template(
@@ -132,7 +138,7 @@ def aluno_serv():
         nome=nome,
         avisos=avisos,
         pedidos_usuario=pedidos_usuario,
-        posicao_fila=posicao_fila
+        posicoes_fila=posicoes_fila
     )
 
 @app.route('/obter', methods=['GET'])
