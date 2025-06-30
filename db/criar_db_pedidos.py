@@ -4,7 +4,7 @@ import sqlite3
 conn = sqlite3.connect('db/pedidos.db')
 cursor = conn.cursor()
 
-# Criando a tabela 'pedidos' com as colunas especificadas
+# Corrige o erro de sintaxe: fecha o parêntese da tabela corretamente
 cursor.executescript('''
 DROP TABLE IF EXISTS pedidos;
 CREATE TABLE IF NOT EXISTS pedidos (
@@ -24,9 +24,9 @@ CREATE TABLE IF NOT EXISTS pedidos (
     dia BOOLEAN,
     noite BOOLEAN,
     timestamp_pronto DATETIME,
-    matricula TEXT
-
-)
+    matricula TEXT,
+    data DATETIME DEFAULT (datetime('now', '-3 hours'))
+);
 ''')
 
 # Comitando as mudanças e fechando a conexão

@@ -73,7 +73,7 @@ def obter_pedidos():
     conn = sqlite3.connect('db/pedidos.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pedidos')
+    cursor.execute('SELECT * FROM pedidos ORDER BY data DESC')
     pedidos = [dict(row) for row in cursor.fetchall()]
     conn.close()
 
