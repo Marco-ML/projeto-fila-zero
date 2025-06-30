@@ -24,6 +24,9 @@
     {% if matricula %}
       <div class="alert alert-info text-center" style="font-size:1.1em;">
         Matrícula: <strong>{{ matricula }}</strong>
+        {% if nome %}
+          &nbsp;|&nbsp; Nome: <strong>{{ nome }}</strong>
+        {% endif %}
       </div>
     {% endif %}
 
@@ -39,6 +42,7 @@
     <div class="nav-buttons text-center">
       <button id="btnCardapio" class="btn btn-primary" onclick="showSection('cardapioSection')">Cardápio</button>
       <button id="btnAvisos" class="btn btn-secondary" onclick="showSection('avisosSection')">Avisos</button>
+      <button id="btnFila" class="btn btn-secondary" onclick="showSection('filaSection')">Minha Fila</button>
     </div>
 
     <!-- Seção Cardápio -->
@@ -146,29 +150,87 @@
         </div>
       {% endif %}
     </div>
+
+    <!-- Seção Fila -->
+    <div id="filaSection" class="section">
+      <h3 class="text-center mb-4">Minha Fila</h3>
+      {% if pedidos_usuario and pedidos_usuario|length > 0 %}
+        {% for pedido in pedidos_usuario %}
+          {% if pedido.dia == 1 %}
+            <div class="alert {{ 'alert-success' if pedido.status == 'pronto' else 'alert-info' }} text-center" style="font-size:1.15em;">
+              <strong>Seu pedido para o almoço</strong>
+              <span>
+                <strong>#{{ pedido.codigo }}</strong>
+                {% if pedido.status == 'pronto' %}
+                  está <strong>PRONTO!</strong>
+                {% else %}
+                  está na posição:
+                  <span style="font-weight:bold;">
+                    {{ loop.index if pedido.status != 'pronto' else '' }}
+                  </span>
+                  da fila.
+                {% endif %}
+              </span>
+              <div class="mt-2">
+                <strong>Status do pedido:</strong> {{ pedido.status|capitalize }}
+              </div>
+            </div>
+          {% elif pedido.noite == 1 %}
+            <div class="alert {{ 'alert-success' if pedido.status == 'pronto' else 'alert-info' }} text-center" style="font-size:1.15em;">
+              <strong>Seu pedido para o jantar</strong>
+              <span>
+                <strong>#{{ pedido.codigo }}</strong>
+                {% if pedido.status == 'pronto' %}
+                  está <strong>PRONTO!</strong>
+                {% else %}
+                  está na posição:
+                  <span style="font-weight:bold;">
+                    {{ loop.index if pedido.status != 'pronto' else '' }}
+                  </span>
+                  da fila.
+                {% endif %}
+              </span>
+              <div class="mt-2">
+                <strong>Status do pedido:</strong> {{ pedido.status|capitalize }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-warning text-center" style="font-size:1.1em;">
+          Nenhum pedido encontrado para sua matrícula hoje.
+        </div>
+      {% endif %}
+    </div>
   </div>
 
   <script>
     function showSection(sectionId) {
       document.getElementById('cardapioSection').classList.remove('active');
       document.getElementById('avisosSection').classList.remove('active');
+      document.getElementById('filaSection').classList.remove('active');
       document.getElementById(sectionId).classList.add('active');
 
       // Troca as cores dos botões conforme a aba ativa
+      document.getElementById('btnCardapio').classList.remove('btn-primary', 'btn-secondary');
+      document.getElementById('btnAvisos').classList.remove('btn-primary', 'btn-secondary');
+      document.getElementById('btnFila').classList.remove('btn-primary', 'btn-secondary');
       if (sectionId === 'cardapioSection') {
-        document.getElementById('btnCardapio').classList.remove('btn-secondary');
         document.getElementById('btnCardapio').classList.add('btn-primary');
-        document.getElementById('btnAvisos').classList.remove('btn-primary');
         document.getElementById('btnAvisos').classList.add('btn-secondary');
-      } else {
-        document.getElementById('btnAvisos').classList.remove('btn-secondary');
-        document.getElementById('btnAvisos').classList.add('btn-primary');
-        document.getElementById('btnCardapio').classList.remove('btn-primary');
+        document.getElementById('btnFila').classList.add('btn-secondary');
+      } else if (sectionId === 'avisosSection') {
         document.getElementById('btnCardapio').classList.add('btn-secondary');
+        document.getElementById('btnAvisos').classList.add('btn-primary');
+        document.getElementById('btnFila').classList.add('btn-secondary');
+      } else {
+        document.getElementById('btnCardapio').classList.add('btn-secondary');
+        document.getElementById('btnAvisos').classList.add('btn-secondary');
+        document.getElementById('btnFila').classList.add('btn-primary');
       }
     }
 
-    // Garante que ao carregar a página, o botão Cardápio está azul e Avisos cinza
+    // Garante que ao carregar a página, o botão Cardápio está azul e os outros cinza
     document.addEventListener('DOMContentLoaded', function() {
       showSection('cardapioSection');
     });

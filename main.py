@@ -39,6 +39,23 @@ def realizar_login():
 # Rota para Cozinha (já existente: função index)
 @app.route('/index')
 def index():
+    # Marcar como pronto todos os pedidos que não são do dia atual
+    from datetime import datetime
+    data_hoje = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect('db/pedidos.db')
+    cursor = conn.cursor()
+    # Marca como pronto todos os pedidos que não são do dia atual e ainda não estão prontos
+    cursor.execute("""
+        UPDATE pedidos
+        SET status = 'pronto'
+        WHERE date(data) != ? AND status != 'pronto'
+    """, (data_hoje,))
+    conn.commit()
+    # Após marcar como pronto, limpa todos os pedidos com status 'pronto'
+    #cursor.execute("DELETE FROM pedidos WHERE status = 'pronto'")
+    #conn.commit()
+    conn.close()
+
     pedidos = obter_pedidos()
     return render_template('index.html', pedidos=pedidos)
 
@@ -46,6 +63,15 @@ def index():
 def aluno_serv():
     from datetime import datetime
     matricula = session.get('matricula')
+    nome = None
+    if matricula:
+        conn_nome = sqlite3.connect('db/alunos.db')
+        cursor_nome = conn_nome.cursor()
+        cursor_nome.execute('SELECT Nome FROM alunos WHERE Matricula = ?', (matricula,))
+        row_nome = cursor_nome.fetchone()
+        if row_nome:
+            nome = row_nome[0]
+        conn_nome.close()
     current_date = datetime.now().strftime("%Y-%m-%d")
     conn = sqlite3.connect('db/cardapio.db')
     cursor = conn.cursor()
@@ -66,7 +92,48 @@ def aluno_serv():
         conn_aviso.close()
     except Exception:
         avisos = []
-    return render_template('aluno_serv.html', cardapio=cardapio, matricula=matricula, avisos=avisos)
+
+    # Busca pedidos do usuário do dia atual
+    pedidos_usuario = []
+    posicao_fila = None
+    if matricula:
+        conn_pedidos = sqlite3.connect('db/pedidos.db')
+        conn_pedidos.row_factory = sqlite3.Row
+        cursor_pedidos = conn_pedidos.cursor()
+        # Busca todos os pedidos do dia atual, ordenados por data de criação
+        cursor_pedidos.execute(
+            "SELECT * FROM pedidos WHERE date(data) = ? ORDER BY data ASC",
+            (current_date,)
+        )
+        pedidos_do_dia = cursor_pedidos.fetchall()
+        # Filtra os pedidos do usuário
+        pedidos_usuario = [dict(row) for row in pedidos_do_dia if row['matricula'] == matricula]
+        # Calcula a posição do pedido mais recente do usuário na fila
+        if pedidos_usuario:
+            pedido_usuario = pedidos_usuario[-1]  # Pega o mais recente do usuário
+            if pedido_usuario['status'] != 'pronto':
+                # Posição é o número de pedidos não prontos antes do pedido do usuário + 1
+                posicao = 1
+                for row in pedidos_do_dia:
+                    if row['status'] == 'pronto':
+                        continue
+                    if row['codigo'] == pedido_usuario['codigo']:
+                        break
+                    posicao += 1
+                posicao_fila = posicao
+            else:
+                posicao_fila = 0  # Pedido já está pronto
+        conn_pedidos.close()
+
+    return render_template(
+        'aluno_serv.html',
+        cardapio=cardapio,
+        matricula=matricula,
+        nome=nome,
+        avisos=avisos,
+        pedidos_usuario=pedidos_usuario,
+        posicao_fila=posicao_fila
+    )
 
 @app.route('/obter', methods=['GET'])
 def obter_pedidos():
